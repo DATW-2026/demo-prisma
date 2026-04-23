@@ -3,6 +3,7 @@ import type {
     UserCreateInput,
     UserCreateWithoutProfileInput,
     UserCreateWithoutReviewsInput,
+    UserUpdateInput,
 } from '../../generated/prisma/models.ts';
 import { env } from '../config/env.ts';
 import debug from 'debug';
@@ -58,5 +59,57 @@ export class UsersRepo {
             id: result.id,
             email: result.email,
         };
+    };
+
+    getUserById = async (id: number) => {
+        const result = await this.#prisma.user.findUnique({
+            where: {
+                id: id,
+            },
+            include: {
+                profile: true,
+            },
+            omit: {
+                password: true,
+            },
+        });
+
+        if (!result) {
+            throw new Error('User Not Found');
+        }
+
+        return result;
+    };
+
+    // TODO -> PERMISOS SOLO A USER
+    updateUserById = async (id: number, userData: UserUpdateInput) => {
+        const result = await this.#prisma.user.update({
+            where: {
+                id: id,
+            },
+            include: {
+                profile: true,
+            },
+            data: userData,
+            omit: {
+                password: true,
+            },
+        });
+
+        return result;
+    };
+
+    // TODO-> PERMISOS SOLO A USER Y ADMIN
+    deleteUserById = async (id: number) => {
+        const result = await this.#prisma.user.delete({
+            where: {
+                id: id,
+            },
+            omit: {
+                password: true,
+            },
+        });
+
+        return result;
     };
 }
