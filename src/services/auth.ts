@@ -1,4 +1,4 @@
-import { hash } from 'bcryptjs';
+import { compare, hash } from 'bcryptjs';
 import debug from 'debug';
 
 import { env } from '../config/env.ts';
@@ -10,5 +10,9 @@ log('Loading auth service...');
 export class AuthService {
     static hash(password: string): Promise<string> {
         return hash(password, 10);
+    }
+
+    static compare(password: string, hash: string): Promise<boolean> {
+        return compare(password, hash);
     }
 }
