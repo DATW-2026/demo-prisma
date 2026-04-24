@@ -41,7 +41,7 @@ model Profile {
 model Film {
   id         Int      @id @default(autoincrement()) @map("film_id")
   title      String   @unique @db.VarChar(255)
-  year       DateTime @default(now()) @map("release_year")
+  year       Int      @map("release_year")
   director   String   @db.VarChar(255)
   duration   Int
   poster     String   @db.VarChar(255)
