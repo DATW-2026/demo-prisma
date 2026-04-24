@@ -2,6 +2,7 @@ import debug from 'debug';
 
 import { env } from './env.ts';
 import { connectDB } from './db-config.ts';
+// import { fileURLToPath } from 'node:url';
 
 const log = debug(`${env.PROJECT_NAME}:seed`);
 log('Loading seed...');
@@ -302,6 +303,7 @@ export const seed = async () => {
                 },
             });
         }
+        console.log('Seed completed successfully.');
     } catch (error) {
         console.error('Error seeding database:', error);
         throw error;
@@ -310,6 +312,18 @@ export const seed = async () => {
     }
 };
 
-seed().catch(() => {
-    process.exit(1);
-});
+// const currentFilePath = fileURLToPath(import.meta.url);
+// const processFilePath = process.argv[1];
+
+// if (currentFilePath === processFilePath) {
+//     console.log('Starting seed');
+//     seed()
+//         .then(() => {
+//             console.log('Seed completed successfully.');
+//             process.exit(0);
+//         })
+//         .catch((error) => {
+//             console.error('Error seeding the database:', error);
+//             process.exit(1);
+//         });
+// }
