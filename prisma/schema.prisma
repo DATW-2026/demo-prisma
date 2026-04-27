@@ -16,10 +16,16 @@ datasource db {
 //     provider = "prisma-zod-generator"
 // }
 
+enum Role {
+    USER
+    EDITOR
+    ADMIN
+}
+
 model User {
   id         Int      @id @default(autoincrement()) @map("user_id")
   email      String   @unique @db.VarChar(100)
-  password   String   @db.VarChar(24)
+  password   String   @db.VarChar(255)
   profile    Profile?
   reviews    Review[]
   created_at DateTime @default(now()) @ignore
