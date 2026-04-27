@@ -8,18 +8,20 @@ const log = debug(`${env.PROJECT_NAME}:router:users`);
 log('Loading Users router...');
 
 export class UsersRouter {
-    #router: Router;
     #controller: UsersController;
+    #router: Router;
 
     constructor(controller: UsersController) {
         log('Starting Users router...');
         this.#controller = controller;
         this.#router = Router();
 
-        this.#router.get(
-            '/:id',
-            this.#controller.getUserById.bind(this.#controller),
-        );
+        this.router.get('/', this.#controller.getAllUsers);
+        this.#router.get('/:id', this.#controller.getUserById);
+        this.#router.post('/register', this.#controller.register);
+        this.#router.post('/login', this.#controller.login);
+        this.router.patch('/:id', this.#controller.updateUser);
+        this.router.delete('/:id', this.#controller.deleteUser);
     }
 
     get router() {
