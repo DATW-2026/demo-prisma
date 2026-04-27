@@ -12,6 +12,7 @@ import type {
 } from '../zod/user.schemas.ts';
 import { AuthService } from '../services/auth.ts';
 import type { LoginResult, TokenPayload } from '../types/login.ts';
+import { Role } from '../../generated/prisma/enums.ts';
 
 const log = debug(`${env.PROJECT_NAME}:repo:users`);
 log('Loading users repo...');
