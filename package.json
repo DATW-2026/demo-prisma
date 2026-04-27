@@ -5,11 +5,14 @@
     "main": "index.ts",
     "scripts": {
         "start": "cross-env NODE_ENV=prod node ./src/index.ts",
-        "dev": "cross-env node --watch --env-file=.env ./src/index.ts",
-        "test": "node --env-file=.env.test --test",
-        "test:serie": "node --env-file=.env.test --test --test-concurrency=1",
+        "dev": "node --watch --env-file=.env ./src/index.ts",
+        "ts:check": "tsc --noEmit",
         "seed:dev": "prisma db seed",
-        "seed:test": "node --env-file=.env ./src/animals/schemas/db-seed-test.ts"
+        "db:push:test": "prisma db push --config prisma.test.config.ts",
+        "db:seed:test": "prisma db seed --config prisma.test.config.ts",
+        "seed:test": "npm run db:push:test && npm run db:seed:test",
+        "test": "node --env-file=.env.test --test",
+        "test:serie": "node --env-file=.env.test --test --test-concurrency=1"
     },
     "repository": {
         "type": "git",
