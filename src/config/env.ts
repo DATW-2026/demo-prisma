@@ -7,6 +7,7 @@ export const EnvSchema = z.object({
     NODE_ENV: z.enum(['dev', 'prod', 'test']),
     PROJECT_NAME: z.string(),
     DEBUG: z.string().optional(),
+    JWT_SECRET: z.string().min(32),
 
     PGUSER: z.string(),
     PGPASSWORD: z.string(),
