@@ -8,17 +8,21 @@ const log = debug(`${env.PROJECT_NAME}:router:users`);
 log('Loading Users router...');
 
 export class UsersRouter {
-    #_router: Router;
+    #router: Router;
     #controller: UsersController;
 
     constructor(controller: UsersController) {
         log('Starting Users router...');
         this.#controller = controller;
-        this.#_router = Router();
+        this.#router = Router();
 
-        this.#_router.get(
+        this.#router.get(
             '/:id',
             this.#controller.getUserById.bind(this.#controller),
         );
+    }
+
+    get router() {
+        return this.#router;
     }
 }
