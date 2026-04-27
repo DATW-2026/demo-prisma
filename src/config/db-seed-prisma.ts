@@ -1,329 +1,154 @@
-import debug from 'debug';
-
 import { env } from './env.ts';
+import debug from 'debug';
 import { connectDB } from './db-config.ts';
-// import { fileURLToPath } from 'node:url';
+import { Role } from '../../generated/prisma/client.ts';
+import type { RegisterUserData } from '../zod/user-schemas.ts';
+import FILMS from '../../data/films.json' with { type: 'json' };
+import GENRES from '../../data/genres.json' with { type: 'json' };
+import { AuthService } from '../services/auth.ts';
+import { fileURLToPath } from 'node:url';
+import type { FilmCreateDTO, GenreCreateDTO } from '../zod/film-schemas.ts';
 
-const log = debug(`${env.PROJECT_NAME}:seed`);
-log('Loading seed...');
-export const seed = async () => {
-    log('Seeding database...');
+const log = debug(`${env.PROJECT_NAME}:configDB`);
+
+log('Loaded database connection...');
+
+const USERS: RegisterUserData[] = [
+    {
+        email: 'erni@sample.com',
+        password: '123456',
+        role: Role.ADMIN,
+        profile: {
+            firstName: 'Ernestina',
+            surname: 'Ada',
+            avatar: '/avatars/admin.png',
+        },
+    },
+    {
+        email: 'pepe@sample.com',
+        password: '123456',
+        role: Role.EDITOR,
+        profile: {
+            firstName: 'Pepe',
+            surname: 'Pérez',
+            avatar: '/avatars/editor.png',
+        },
+    },
+    {
+        email: 'ursula@sample.com',
+        password: '123456',
+        role: Role.USER,
+        profile: {
+            firstName: 'Ursula',
+            surname: 'Martín',
+            avatar: '/avatars/user.png',
+        },
+    },
+];
+
+export const filmSeed = async (
+    films: FilmCreateDTO[],
+    genres: GenreCreateDTO[],
+) => {
     const prisma = await connectDB();
-    await prisma.$connect();
+    log('Seeding to database...');
 
-    try {
-        await prisma.review.deleteMany();
-        await prisma.film.deleteMany();
-        await prisma.genre.deleteMany();
-        await prisma.genre.createMany({
-            data: [
-                { name: 'Action' },
-                { name: 'Comedy' },
-                { name: 'Drama' },
-                { name: 'Horror' },
-                { name: 'Crime' },
-                { name: 'Sci-Fi' },
-                { name: 'Adventure' },
-                { name: 'Fantasy' },
-                { name: 'Animation' },
-                { name: 'Thriller' },
-                { name: 'Romance' },
-                { name: 'History' },
-                { name: 'Mystery' },
-            ],
+    await prisma.review.deleteMany();
+    await prisma.film.deleteMany();
+    await prisma.genre.deleteMany();
+
+    await prisma.genre.createMany({
+        data: genres,
+    });
+
+    for (const film of films) {
+        await prisma.film.create({
+            data: {
+                title: film.title,
+                year: film.year,
+                director: film.director,
+                duration: film.duration,
+                rate: film.rate,
+                poster: film.poster as string,
+                genres: {
+                    connect: film.genres.map((genre) => ({ name: genre })),
+                },
+            },
         });
+    }
+};
 
-        const films = [
-            {
-                title: 'The Shawshank Redemption',
-                year: 1994,
-                director: 'Frank Darabont',
-                duration: 142,
-                rate: 9.3,
-                poster: 'https://www.imdb.com/title/tt0111161/',
-                genres: ['Drama'],
-            },
-            {
-                title: 'The Godfather',
-                year: 1972,
-                director: 'Francis Ford Coppola',
-                duration: 175,
-                rate: 9.2,
-                poster: 'https://www.imdb.com/title/tt0068646/',
-                genres: ['Crime', 'Drama'],
-            },
-            {
-                title: 'The Dark Knight',
-                year: 2008,
-                director: 'Christopher Nolan',
-                duration: 152,
-                rate: 9.0,
-                poster: 'https://www.imdb.com/title/tt0468569/',
-                genres: ['Action', 'Crime', 'Drama'],
-            },
-            {
-                title: 'The Lord of the Rings: The Return of the King',
-                year: 2003,
-                director: 'Peter Jackson',
-                duration: 201,
-                rate: 8.9,
-                poster: 'https://www.imdb.com/title/tt0167260/',
-                genres: ['Adventure', 'Drama', 'Fantasy'],
-            },
-            {
-                title: 'Pulp Fiction',
-                year: 1994,
-                director: 'Quentin Tarantino',
-                duration: 154,
-                rate: 8.9,
-                poster: 'https://www.imdb.com/title/tt0110912/',
-                genres: ['Crime', 'Drama'],
-            },
-            {
-                title: "Schindler's List",
-                year: 1993,
-                director: 'Steven Spielberg',
-                duration: 195,
-                rate: 8.9,
-                poster: 'https://www.imdb.com/title/tt0108052/',
-                genres: ['Drama', 'History'],
-            },
-            {
-                title: 'The Lord of the Rings: The Fellowship of the Ring',
-                year: 2001,
-                director: 'Peter Jackson',
-                duration: 178,
-                rate: 8.8,
-                poster: 'https://www.imdb.com/title/tt0120737/',
-                genres: ['Adventure', 'Drama', 'Fantasy'],
-            },
-            {
-                title: 'Forrest Gump',
-                year: 1994,
-                director: 'Robert Zemeckis',
-                duration: 142,
-                rate: 8.8,
-                poster: 'https://www.imdb.com/title/tt0109830/',
-                genres: ['Drama'],
-            },
-            {
-                title: 'Inception',
-                year: 2010,
-                director: 'Christopher Nolan',
-                duration: 148,
-                rate: 8.7,
-                poster: 'https://www.imdb.com/title/tt1375666/',
-                genres: ['Action', 'Adventure', 'Sci-Fi'],
-            },
-            {
-                title: 'The Lord of the Rings: The Two Towers',
-                year: 2002,
-                director: 'Peter Jackson',
-                duration: 179,
-                rate: 8.7,
-                poster: 'https://www.imdb.com/title/tt0167261/',
-                genres: ['Adventure', 'Drama', 'Fantasy'],
-            },
-            {
-                title: 'The Matrix',
-                year: 1999,
-                director: 'Lana Wachowski, Lilly Wachowski',
-                duration: 136,
-                rate: 8.7,
-                poster: 'https://www.imdb.com/title/tt0133093/',
-                genres: ['Action', 'Sci-Fi'],
-            },
-            {
-                title: 'Goodfellas',
-                year: 1990,
-                director: 'Martin Scorsese',
-                duration: 146,
-                rate: 8.7,
-                poster: 'https://www.imdb.com/title/tt0099685/',
-                genres: ['Crime', 'Drama'],
-            },
-            {
-                title: "One Flew Over the Cuckoo's Nest",
-                year: 1975,
-                director: 'Milos Forman',
-                duration: 133,
-                rate: 8.7,
-                poster: 'https://www.imdb.com/title/tt0073486/',
-                genres: ['Drama'],
-            },
-            {
-                title: 'Seven',
-                year: 1995,
-                director: 'David Fincher',
-                duration: 127,
-                rate: 8.6,
-                poster: 'https://www.imdb.com/title/tt0114369/',
-                genres: ['Crime', 'Drama'],
-            },
-            {
-                title: 'The Silence of the Lambs',
-                year: 1991,
-                director: 'Jonathan Demme',
-                duration: 118,
-                rate: 8.6,
-                poster: 'https://www.imdb.com/title/tt0102926/',
-                genres: ['Crime', 'Drama'],
-            },
-            {
-                title: 'The Usual Suspects',
-                year: 1995,
-                director: 'Bryan Singer',
-                duration: 106,
-                rate: 8.5,
-                poster: 'https://www.imdb.com/title/tt0114814/',
-                genres: ['Crime', 'Drama'],
-            },
-            {
-                title: 'Léon: The Professional',
-                year: 1994,
-                director: 'Luc Besson',
-                duration: 110,
-                rate: 8.5,
-                poster: 'https://www.imdb.com/title/tt0110413/',
-                genres: ['Crime', 'Drama'],
-            },
-            {
-                title: 'The Lion King',
-                year: 1994,
-                director: 'Roger Allers, Rob Minkoff',
-                duration: 88,
-                rate: 8.5,
-                poster: 'https://www.imdb.com/title/tt0110357/',
-                genres: ['Adventure', 'Animation', 'Drama'],
-            },
-            {
-                title: 'Terminator 2: Judgment Day',
-                year: 1991,
-                director: 'James Cameron',
-                duration: 137,
-                rate: 8.5,
-                poster: 'https://www.imdb.com/title/tt0103064/',
-                genres: ['Action', 'Sci-Fi'],
-            },
-            {
-                title: 'Saving Private Ryan',
-                year: 1998,
-                director: 'Steven Spielberg',
-                duration: 169,
-                rate: 8.5,
-                poster: 'https://www.imdb.com/title/tt0120815/',
-                genres: ['Action', 'Drama', 'History'],
-            },
-            {
-                title: 'The Green Mile',
-                year: 1999,
-                director: 'Frank Darabont',
-                duration: 189,
-                rate: 8.5,
-                poster: 'https://www.imdb.com/title/tt0120689/',
-                genres: ['Drama'],
-            },
-            {
-                title: 'Back to the Future',
-                year: 1985,
-                director: 'Robert Zemeckis',
-                duration: 116,
-                rate: 8.5,
-                poster: 'https://www.imdb.com/title/tt0088763/',
-                genres: ['Adventure', 'Comedy', 'Sci-Fi'],
-            },
-            {
-                title: 'American History X',
-                year: 1998,
-                director: 'Tony Kaye',
-                duration: 119,
-                rate: 8.5,
-                poster: 'https://www.imdb.com/title/tt0120586/',
-                genres: ['Crime', 'Drama'],
-            },
-            {
-                title: 'The Pianist',
-                year: 2002,
-                director: 'Roman Polanski',
-                duration: 150,
-                rate: 8.5,
-                poster: 'https://www.imdb.com/title/tt0253474/',
-                genres: ['Drama', 'History'],
-            },
-            {
-                title: 'Gladiator',
-                year: 2000,
-                director: 'Ridley Scott',
-                duration: 155,
-                rate: 8.5,
-                poster: 'https://www.imdb.com/title/tt0172495/',
-                genres: ['Action', 'Drama'],
-            },
-            {
-                title: 'The Departed',
-                year: 2006,
-                director: 'Martin Scorsese',
-                duration: 151,
-                rate: 8.5,
-                poster: 'https://www.imdb.com/title/tt0407887/',
-                genres: ['Crime', 'Drama'],
-            },
-            {
-                title: 'The Prestige',
-                year: 2006,
-                director: 'Christopher Nolan',
-                duration: 130,
-                rate: 8.5,
-                poster: 'https://www.imdb.com/title/tt0482571/',
-                genres: ['Drama', 'Mystery', 'Sci-Fi'],
-            },
-            {
-                title: 'The Intouchables',
-                year: 2011,
-                director: 'Olivier Nakache, Éric Toledano',
-                duration: 112,
-                rate: 8.5,
-                poster: 'https://www.imdb.com/title/tt1675434/',
-                genres: ['Drama', 'Comedy'],
-            },
-        ];
+export const userSeed = async (users: RegisterUserData[]) => {
+    const prisma = await connectDB();
+    log('Seeding users to database...');
 
-        for (const film of films) {
-            await prisma.film.create({
+    await prisma.review.deleteMany();
+    await prisma.profile.deleteMany();
+    await prisma.user.deleteMany();
+
+    for (const user of users) {
+        const hashedPassword = await AuthService.hash(user.password);
+
+        await prisma.user.create({
+            data: {
+                email: user.email,
+                password: hashedPassword,
+                role: user.role as Role,
+                profile: {
+                    create: user.profile,
+                },
+            },
+        });
+    }
+};
+
+export const reviewSeed = async () => {
+    const prisma = await connectDB();
+    log('Seeding reviews to database...');
+
+    await prisma.review.deleteMany();
+
+    const users = await prisma.user.findMany();
+    const films = await prisma.film.findMany();
+
+    for (const user of users) {
+        for (const film of films.slice(0, 3)) {
+            // Limit to 3 reviews per user for demo purposes
+            await prisma.review.create({
                 data: {
-                    title: film.title,
-                    year: film.year,
-                    director: film.director,
-                    duration: film.duration,
-                    rate: film.rate,
-                    poster: film.poster,
-                    genres: {
-                        connect: film.genres.map((name) => ({ name })),
+                    rate: Math.floor(Math.random() * 5) + 1,
+                    review: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+                    user: {
+                        connect: { id: user.id },
+                    },
+                    film: {
+                        connect: { id: film.id },
                     },
                 },
             });
         }
-        console.log('Seed completed successfully.');
-    } catch (error) {
-        console.error('Error seeding database:', error);
-        throw error;
-    } finally {
-        await prisma.$disconnect();
     }
 };
 
-// const currentFilePath = fileURLToPath(import.meta.url);
-// const processFilePath = process.argv[1];
+export const seed = async () => {
+    await filmSeed(FILMS, GENRES);
+    await userSeed(USERS);
+    await reviewSeed();
+};
 
-// if (currentFilePath === processFilePath) {
-//     console.log('Starting seed');
-//     seed()
-//         .then(() => {
-//             console.log('Seed completed successfully.');
-//             process.exit(0);
-//         })
-//         .catch((error) => {
-//             console.error('Error seeding the database:', error);
-//             process.exit(1);
-//         });
-// }
+// Run seed if this file is executed directly
+const currentFilePath = fileURLToPath(import.meta.url);
+const processFilePath = process.argv[1];
+
+if (currentFilePath === processFilePath) {
+    console.log('Starting seed');
+    seed()
+        .then(() => {
+            console.log('Seed completed successfully.');
+            process.exit(0);
+        })
+        .catch((error) => {
+            console.error('Error seeding the database:', error);
+            process.exit(1);
+        });
+}
