@@ -1,115 +1,136 @@
-import type { PrismaClient } from '../../generated/prisma/client.ts';
-import type {
-    UserCreateInput,
-    UserCreateWithoutProfileInput,
-    UserCreateWithoutReviewsInput,
-    UserUpdateInput,
-} from '../../generated/prisma/models.ts';
-import { env } from '../config/env.ts';
 import debug from 'debug';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/client';
+
+import { env } from '../config/env.ts';
+import type { AppPrismaClient } from '../config/db-config.ts';
+import type {
+    LoginUserData,
+    ProfileDTO,
+    RegisterUserData,
+    User,
+    UserUpdateDTO,
+} from '../zod/user.schemas.ts';
 import { AuthService } from '../services/auth.ts';
-import { compare } from 'bcryptjs';
 
 const log = debug(`${env.PROJECT_NAME}:repo:users`);
 log('Loading users repo...');
 
 export class UsersRepo {
-    #prisma: PrismaClient;
+    #prisma: AppPrismaClient;
 
-    constructor(prisma: PrismaClient) {
+    constructor(prisma: AppPrismaClient) {
         this.#prisma = prisma;
     }
 
-    register = async (userData: UserCreateInput) => {
-        userData.password = await AuthService.hash(userData.password);
-        const result = await this.#prisma.user.create({
-            data: userData,
+    register = async (userData: RegisterUserData): Promise<User> => {
+        log(`Registering user with email ${userData.email}`);
+
+        const hashedPassword = await AuthService.hash(userData.password);
+        const registeredUser = await this.#prisma.user.create({
+            data: {
+                email: userData.email,
+                password: hashedPassword,
+                role: Role.USER,
+                profile: {
+                    create: userData.profile,
+                },
+            },
             include: {
                 profile: true,
             },
-            omit: {
-                password: true,
-            },
         });
 
-        return result.email;
+        return registeredUser as User;
     };
 
-    login = async (
-        userData: UserCreateWithoutProfileInput & UserCreateWithoutReviewsInput,
-    ) => {
-        const loginError = new Error('Invalid Login');
-        const result = await this.#prisma.user.findUnique({
-            where: {
-                email: userData.email,
-            },
+    login = async (userData: LoginUserData): Promise<LoginResult> => {
+        log(`Logging in user with email ${userData.email}`);
+
+        const result = await this.#prisma.user.findUniqueOrThrow({
+            where: { email: userData.email },
+            omit: { password: false },
         });
 
-        if (!result) {
-            throw loginError;
-        }
-
-        const isValid = await compare(userData.password, result.password);
+        const isValid = await AuthService.compare(
+            userData.password,
+            result.password,
+        );
 
         if (!isValid) {
-            throw loginError;
+            throw new PrismaClientKnownRequestError(
+                'Invalid user or password',
+                {
+                    code: 'P2004',
+                    clientVersion: '',
+                },
+            );
         }
 
-        return {
+        const payload: TokenPayload = {
             id: result.id,
             email: result.email,
+            role: result.role,
         };
+        const token = AuthService.generateToken(payload);
+
+        return { payload, token };
     };
 
-    getUserById = async (id: number) => {
-        const result = await this.#prisma.user.findUnique({
-            where: {
-                id: id,
-            },
-            include: {
-                profile: true,
-            },
-            omit: {
-                password: true,
-            },
-        });
+    getAllUsers = async (): Promise<User[]> => {
+        log('Getting all users');
 
-        if (!result) {
-            throw new Error('User Not Found');
-        }
-
-        return result;
+        return this.#prisma.user.findMany({
+            include: { profile: true },
+        }) as Promise<User[]>;
     };
 
-    // TODO -> PERMISOS SOLO A USER
-    updateUserById = async (id: number, userData: UserUpdateInput) => {
-        const result = await this.#prisma.user.update({
-            where: {
-                id: id,
-            },
-            include: {
-                profile: true,
-            },
-            data: userData,
-            omit: {
-                password: true,
-            },
-        });
+    getUserById = async (id: number): Promise<User> => {
+        log(`Getting user with id ${id}`);
 
-        return result;
+        return this.#prisma.user.findUniqueOrThrow({
+            where: { id },
+            include: { profile: true },
+        }) as Promise<User>;
     };
 
-    // TODO-> PERMISOS SOLO A USER Y ADMIN
-    deleteUserById = async (id: number) => {
-        const result = await this.#prisma.user.delete({
-            where: {
-                id: id,
-            },
-            omit: {
-                password: true,
-            },
-        });
+    updateUserById = async (
+        id: number,
+        userData: UserUpdateDTO,
+    ): Promise<User> => {
+        log(`Updating user with id ${id}`);
 
-        return result;
+        return this.#prisma.user.update({
+            where: { id },
+            data: {
+                ...userData,
+                ...(userData.password && {
+                    password: await AuthService.hash(userData.password),
+                }),
+            },
+            include: { profile: true },
+        }) as Promise<User>;
+    };
+
+    updateUserProfile = async (
+        id: number,
+        profileData: ProfileDTO,
+    ): Promise<User> => {
+        log(`Updating user profile with id ${id}`);
+
+        return this.#prisma.user.update({
+            where: { id: id },
+            data: {
+                profile: { update: profileData },
+            },
+            include: { profile: true },
+        }) as Promise<User>;
+    };
+
+    deleteUserById = async (id: number): Promise<User> => {
+        log(`Deleting user with id ${id}`);
+
+        return this.#prisma.user.delete({
+            where: { id: id },
+        }) as Promise<User>;
     };
 }
