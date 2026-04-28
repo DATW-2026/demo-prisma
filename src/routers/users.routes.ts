@@ -60,6 +60,7 @@ export class UsersRouter {
             '/:id',
             validateId(),
             this.#authInterceptor.authenticate,
+            this.#authInterceptor.authorize(),
             this.#controller.deleteUser,
         );
     }

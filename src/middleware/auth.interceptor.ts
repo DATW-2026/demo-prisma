@@ -4,6 +4,7 @@ import type { Request, Response, NextFunction } from 'express';
 import { env } from '../config/env.ts';
 import { HttpError } from '../errors/http-error.ts';
 import { AuthService } from '../services/auth.ts';
+import { Role } from '../../generated/prisma/enums.ts';
 
 const log = debug(`${env.PROJECT_NAME}:middleware:auth`);
 log('Initializing auth interceptor middleware...');
@@ -44,5 +45,36 @@ export class AuthInterceptor {
 
             return next(unauthorizedError);
         }
+    };
+
+    authorize = (roles: string[] = []) => {
+        return (req: Request, _res: Response, next: NextFunction) => {
+            log('Authorizing request for roles:', { roles });
+
+            if (!req.user) {
+                log('No user information found in request');
+
+                return next(unauthorizedError);
+            }
+
+            if (
+                req.user.role !== Role.ADMIN &&
+                !roles.includes(req.user.role)
+            ) {
+                log('User role not authorized:', { userRole: req.user.role });
+
+                return next(
+                    new HttpError(
+                        403,
+                        'Forbidden',
+                        'You do not have permission to access this resource.',
+                    ),
+                );
+            }
+
+            log('User authorized successfully');
+
+            return next();
+        };
     };
 }
