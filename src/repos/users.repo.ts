@@ -109,8 +109,8 @@ export class UsersRepo {
                     password: await AuthService.hash(userData.password),
                 }),
             },
-            include: { profile: true },
-        }) as Promise<User>;
+            include: { profile: { omit: { id: true } } },
+        }) as unknown as Promise<User>;
     };
 
     updateUserProfile = async (
@@ -124,8 +124,8 @@ export class UsersRepo {
             data: {
                 profile: { update: profileData },
             },
-            include: { profile: true },
-        }) as Promise<User>;
+            include: { profile: { omit: { id: true } } },
+        }) as unknown as Promise<User>;
     };
 
     deleteUserById = async (id: number): Promise<User> => {
