@@ -15,7 +15,7 @@ const unauthorizedError = new HttpError(
 );
 
 export class AuthInterceptor {
-    authenticate(req: Request, _res: Response, next: NextFunction) {
+    authenticate = (req: Request, _res: Response, next: NextFunction) => {
         log('Authenticating request...');
 
         const authHeader = req.header('authorization');
@@ -44,5 +44,5 @@ export class AuthInterceptor {
 
             return next(unauthorizedError);
         }
-    }
+    };
 }
