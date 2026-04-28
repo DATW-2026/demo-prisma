@@ -77,4 +77,33 @@ export class AuthInterceptor {
             return next();
         };
     };
+
+    isOwnerOrAdmin = (req: Request, _res: Response, next: NextFunction) => {
+        log('Checking if user is owner or admin...');
+
+        if (!req.user) {
+            log('No user information found in request');
+
+            return next(unauthorizedError);
+        }
+
+        const isAdmin = req.user.role === Role.ADMIN;
+        const isOwner = req.user.id === Number(req.params.id);
+
+        if (!isAdmin && !isOwner) {
+            log('User is not owner or admin:', { userId: req.user.id });
+
+            return next(
+                new HttpError(
+                    403,
+                    'Forbidden',
+                    'You do not have permission to access this resource.',
+                ),
+            );
+        }
+
+        log('User is owner or admin, access granted');
+
+        return next();
+    };
 }

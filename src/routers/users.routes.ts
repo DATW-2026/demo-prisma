@@ -53,6 +53,7 @@ export class UsersRouter {
             validateId(),
             validateBody(UpdateUserDTOSchema),
             this.#authInterceptor.authenticate,
+            this.#authInterceptor.isOwnerOrAdmin,
             this.#controller.updateUser,
         );
 
@@ -60,7 +61,7 @@ export class UsersRouter {
             '/:id',
             validateId(),
             this.#authInterceptor.authenticate,
-            this.#authInterceptor.authorize(),
+            this.#authInterceptor.isOwnerOrAdmin,
             this.#controller.deleteUser,
         );
     }
