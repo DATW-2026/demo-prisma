@@ -10,6 +10,9 @@ import { errorHandler } from './middleware/error-handler.ts';
 import { HomeView } from './views/home.ts';
 import { customHeaders } from './middleware/customs.ts';
 import type { AppPrismaClient } from './config/db-config.ts';
+import { UsersRepo } from './repos/users.repo.ts';
+import { UsersController } from './controllers/users.controller.ts';
+import { UsersRouter } from './routers/users.routes.ts';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const createApp = (prisma: AppPrismaClient) => {
@@ -45,6 +48,12 @@ export const createApp = (prisma: AppPrismaClient) => {
         log('Received request to root endpoint');
         return res.send(await HomeView.render());
     });
+
+    // users routes
+    const appRepo = new UsersRepo(prisma);
+    const appController = new UsersController(appRepo);
+    const appRouter = new UsersRouter(appController);
+    app.use('/api/users', appRouter.router);
 
     app.use((_req, _res, next) => {
         log('Calling errorHandler for 404 error');

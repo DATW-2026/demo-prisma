@@ -122,18 +122,18 @@ export class UsersController {
                 );
 
                 return next(finalError);
-            } else {
-                const finalError = new HttpError(
-                    500,
-                    'Internal Server Error',
-                    'Failed to login user',
-                    {
-                        cause: error,
-                    },
-                );
-
-                return next(finalError);
             }
+
+            const finalError = new HttpError(
+                500,
+                'Internal Server Error',
+                'Failed to login user',
+                {
+                    cause: error,
+                },
+            );
+
+            return next(finalError);
         }
     };
 
@@ -162,18 +162,18 @@ export class UsersController {
                 );
 
                 return next(finalError);
-            } else {
-                const finalError = new HttpError(
-                    500,
-                    'Internal Server Error',
-                    'Failed to login user',
-                    {
-                        cause: error,
-                    },
-                );
-
-                return next(finalError);
             }
+
+            const finalError = new HttpError(
+                500,
+                'Internal Server Error',
+                'Failed to login user',
+                {
+                    cause: error,
+                },
+            );
+
+            return next(finalError);
         }
     };
 
@@ -198,18 +198,18 @@ export class UsersController {
                 );
 
                 return next(finalError);
-            } else {
-                const finalError = new HttpError(
-                    500,
-                    'Internal Server Error',
-                    'Failed to login user',
-                    {
-                        cause: error,
-                    },
-                );
-
-                return next(finalError);
             }
+
+            const finalError = new HttpError(
+                500,
+                'Internal Server Error',
+                'Failed to login user',
+                {
+                    cause: error,
+                },
+            );
+
+            return next(finalError);
         }
     };
 }
