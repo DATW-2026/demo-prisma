@@ -35,6 +35,7 @@ export class AuthInterceptor {
         try {
             const payload = AuthService.verifyToken(token);
             req.user = payload;
+            log('Token verified successfully:', { payload });
 
             return next();
         } catch (error) {
