@@ -5,6 +5,7 @@ import { PrismaClientKnownRequestError } from '@prisma/client/runtime/client';
 import { env } from '../config/env.ts';
 import type { UsersRepo } from '../repos/users.repo.ts';
 import type {
+    LoginUserData,
     RegisterUserData,
     User,
     UserUpdateDTO,
@@ -50,7 +51,7 @@ export class UsersController {
         log('Logging User...');
 
         try {
-            const loginData = req.body;
+            const loginData: LoginUserData = req.body;
             const loginResult: LoginResult = await this.#repo.login(loginData);
 
             return res.json(loginResult);
