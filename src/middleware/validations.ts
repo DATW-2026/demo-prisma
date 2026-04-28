@@ -13,20 +13,25 @@ export const validateId = (
 ) => {
     return (req: Request, _res: Response, next: NextFunction) => {
         log('Validating ID...');
+
         const { id } = req.params;
+
         if (!id) {
             const error = new HttpError(
                 400,
                 'Bad Request',
-                'Animal ID is required',
+                'User ID is required',
             );
-            next(error);
+
+            return next(error);
         }
+
         try {
             schema.parse({ id });
-            next();
+
+            return next();
         } catch (error) {
-            next(error);
+            return next(error);
         }
     };
 };
@@ -34,12 +39,14 @@ export const validateId = (
 export const validateBody = (schema: ZodObject) => {
     return (req: Request, _res: Response, next: NextFunction) => {
         log('Validating request body...');
+
         try {
             const validationResult = schema.parse(req.body);
             req.body = validationResult;
-            next();
+
+            return next();
         } catch (error) {
-            next(error);
+            return next(error);
         }
     };
 };
