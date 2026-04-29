@@ -1,7 +1,7 @@
 import { Router } from 'express';
+import debug from 'debug';
 
 import { env } from '../config/env.ts';
-import debug from 'debug';
 import type { UsersController } from '../controllers/users.controller.ts';
 import { validateBody, validateId } from '../middleware/validations.ts';
 import {

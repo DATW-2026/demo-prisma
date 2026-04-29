@@ -1,10 +1,8 @@
 import { Router } from 'express';
-
-import { env } from '../config/env.ts';
 import debug from 'debug';
 
+import { env } from '../config/env.ts';
 import { validateBody, validateId } from '../middleware/validations.ts';
-
 import type { AuthInterceptor } from '../middleware/auth.interceptor.ts';
 import type { FilmsController } from '../controllers/films.controller.ts';
 import {
@@ -13,7 +11,7 @@ import {
 } from '../zod/film.schemas.ts';
 
 const log = debug(`${env.PROJECT_NAME}:router:users`);
-log('Loading Users router...');
+log('Loading Films router...');
 
 export class FilmsRouter {
     #controller: FilmsController;
