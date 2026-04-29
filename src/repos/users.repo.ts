@@ -79,7 +79,7 @@ export class UsersRepo {
     };
 
     getAllUsers = async (): Promise<User[]> => {
-        log('Getting all users');
+        log('Getting all users...');
 
         return this.#prisma.user.findMany({
             include: {
@@ -103,7 +103,7 @@ export class UsersRepo {
         id: number,
         userData: UserUpdateDTO,
     ): Promise<User> => {
-        log(`Updating user with id ${id}`);
+        log(`Updating user with id ${id}...`);
 
         return this.#prisma.user.update({
             where: { id },
@@ -123,7 +123,7 @@ export class UsersRepo {
         id: number,
         profileData: ProfileDTO,
     ): Promise<User> => {
-        log(`Updating user profile with id ${id}`);
+        log(`Updating user profile with id ${id}...`);
 
         return this.#prisma.user.update({
             where: { id: id },
@@ -137,7 +137,7 @@ export class UsersRepo {
     };
 
     deleteUserById = async (id: number): Promise<User> => {
-        log(`Deleting user with id ${id}`);
+        log(`Deleting user with id ${id}...`);
 
         return this.#prisma.user.delete({
             where: { id: id },
