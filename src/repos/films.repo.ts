@@ -41,6 +41,8 @@ export class FilmsRepo {
     };
 
     createFilm = async (filmData: FilmCreateDTO): Promise<Film> => {
+        log(`Creating new film...`);
+
         const newFilm = await this.#prisma.film.create({
             data: {
                 title: filmData.title,
