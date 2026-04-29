@@ -50,8 +50,10 @@ export const FilmModelSchema = z.strictObject({
     duration: z.number(),
     poster: z.string().nullable(),
     rate: z.instanceof(Decimal),
-    genres: z.array(GenreModelSchema).optional(),
-    reviews: z.array(ReviewModelSchema).optional(),
+    genres: z.array(GenreModelSchema.omit({ id: true }).optional()),
+    reviews: z
+        .array(ReviewModelSchema.omit({ userID: true, filmID: true }))
+        .optional(),
 });
 
 export const GenreCreateDTOSchema = z.strictObject({
