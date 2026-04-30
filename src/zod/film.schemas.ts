@@ -56,6 +56,16 @@ export const FilmModelSchema = z.strictObject({
         .optional(),
 });
 
+export const GenreDetailSchema = z.strictObject({
+    id: z.number(),
+    name: z.string(),
+    films: z.array(
+        FilmModelSchema.omit({
+            reviews: true,
+        }),
+    ),
+});
+
 export const GenreCreateDTOSchema = z.strictObject({
     name: z.string().trim().min(1).max(60),
 });
@@ -242,3 +252,5 @@ export type ReviewParamsDTO = z.infer<typeof ReviewParamsSchema>;
 export type _ReviewParamsDTOCheck = Assert<
     IsExact<ReviewParamsDTO, ReviewParamsShape>
 >;
+
+export type GenreDetail = z.infer<typeof GenreDetailSchema>;
