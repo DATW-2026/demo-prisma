@@ -3,7 +3,11 @@ import type { NextFunction, Request, Response } from 'express';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/client';
 
 import { env } from '../config/env.ts';
-import { HttpError } from '../errors/http-error.ts';
+import {
+    HttpError,
+    InternalServerError,
+    NotFoundError,
+} from '../errors/http-error.ts';
 import type { FilmsRepo } from '../repos/films.repo.ts';
 import type {
     Film,
@@ -27,7 +31,7 @@ export class FilmsController {
         try {
             const films: Film[] = await this.#repo.getAllFilms();
 
-            res.json(films);
+            return res.json(films);
         } catch (error) {
             const finalError = new HttpError(
                 500,
@@ -52,10 +56,9 @@ export class FilmsController {
             res.json(film);
         } catch (error) {
             log('Error getting film by id: %O', error);
+
             if (error instanceof PrismaClientKnownRequestError) {
-                const finalError = new HttpError(
-                    404,
-                    'Not Found',
+                const finalError = new NotFoundError(
                     `Film with id ${id} not found`,
                     {
                         cause: error,
@@ -65,10 +68,8 @@ export class FilmsController {
                 return next(finalError);
             }
 
-            const finalError = new HttpError(
-                500,
-                'Internal Server Error',
-                'Failed to get film',
+            const finalError = new InternalServerError(
+                `Failed to get film with id ${id}`,
                 {
                     cause: error,
                 },
@@ -89,10 +90,8 @@ export class FilmsController {
         } catch (error) {
             log('Error registering film: %O', error);
 
-            const finalError = new HttpError(
-                500,
-                'Internal Server Error',
-                'Failed to register user',
+            const finalError = new InternalServerError(
+                'Failed to register film',
                 {
                     cause: error,
                 },
@@ -116,10 +115,9 @@ export class FilmsController {
             res.json(updatedFilm);
         } catch (error) {
             log('Error updating film by id: %O', error);
+
             if (error instanceof PrismaClientKnownRequestError) {
-                const finalError = new HttpError(
-                    404,
-                    'Not Found',
+                const finalError = new NotFoundError(
                     `Film with id ${id} not found`,
                     {
                         cause: error,
@@ -129,10 +127,8 @@ export class FilmsController {
                 return next(finalError);
             }
 
-            const finalError = new HttpError(
-                500,
-                'Internal Server Error',
-                'Failed to update film',
+            const finalError = new InternalServerError(
+                `Failed to update film with id ${id}`,
                 {
                     cause: error,
                 },
@@ -153,9 +149,7 @@ export class FilmsController {
         } catch (error) {
             log('Error deleting film by id: %O', error);
             if (error instanceof PrismaClientKnownRequestError) {
-                const finalError = new HttpError(
-                    404,
-                    'Not Found',
+                const finalError = new NotFoundError(
                     `Film with id ${id} not found`,
                     {
                         cause: error,
@@ -165,10 +159,8 @@ export class FilmsController {
                 return next(finalError);
             }
 
-            const finalError = new HttpError(
-                500,
-                'Internal Server Error',
-                'Failed to delete film',
+            const finalError = new InternalServerError(
+                `Failed to delete film with id ${id}`,
                 {
                     cause: error,
                 },
