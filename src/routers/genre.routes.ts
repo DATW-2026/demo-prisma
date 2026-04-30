@@ -4,7 +4,7 @@ import { Router } from 'express';
 import { env } from '../config/env.ts';
 import { validateBody, validateId } from '../middleware/validations.ts';
 import type { AuthInterceptor } from '../middleware/auth.interceptor.ts';
-import type { GenreController } from '../controllers/genres.controller.ts';
+import type { GenresController } from '../controllers/genres.controller.ts';
 import { GenreCreateDTOSchema } from '../zod/film.schemas.ts';
 
 const log = debug(`${env.PROJECT_NAME}:router:genres`);
@@ -13,9 +13,12 @@ log('Loading genres router...');
 export class GenresRouter {
     #router: Router;
     authInterceptor: AuthInterceptor;
-    controller: GenreController;
+    controller: GenresController;
 
-    constructor(controller: GenreController, authInterceptor: AuthInterceptor) {
+    constructor(
+        controller: GenresController,
+        authInterceptor: AuthInterceptor,
+    ) {
         log('Starting genres router...');
         this.controller = controller;
         this.authInterceptor = authInterceptor;

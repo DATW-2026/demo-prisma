@@ -19,6 +19,9 @@ import { UsersRouter } from './routers/users.routes.ts';
 import { FilmsController } from './controllers/films.controller.ts';
 import { FilmsRouter } from './routers/films.routes.ts';
 import { FilmsRepo } from './repos/films.repo.ts';
+import { GenreRepo } from './repos/genre.repo.ts';
+import { GenresRouter } from './routers/genre.routes.ts';
+import { GenresController } from './controllers/genres.controller.ts';
 
 declare module 'express' {
     interface Request {
@@ -73,6 +76,12 @@ export const createApp = (prisma: AppPrismaClient) => {
     const filmsController = new FilmsController(filmsRepo);
     const filmsRouter = new FilmsRouter(filmsController, authInterceptor);
     app.use('/api/films', filmsRouter.router);
+
+    //Genres routes
+    const genresRepo = new GenreRepo(prisma);
+    const genresController = new GenresController(genresRepo);
+    const genresRouter = new GenresRouter(genresController, authInterceptor);
+    app.use('/api/genres', genresRouter.router);
 
     app.use((_req, _res, next) => {
         log('Calling errorHandler for 404 error');

@@ -10,7 +10,7 @@ import { PrismaClientKnownRequestError } from '@prisma/client/runtime/client';
 const log = debug(`${env.PROJECT_NAME}:controller:genres`);
 log('Loading genres controller...');
 
-export class GenreController {
+export class GenresController {
     #genreRepo: GenreRepo;
 
     constructor(genreRepo: GenreRepo) {
